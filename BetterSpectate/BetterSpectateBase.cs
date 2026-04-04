@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace BetterSpectate
 {
-	[BepInPlugin("Fusition.BetterSpectate", "BetterSpectate", "1.0.0.0")]
+	[BepInPlugin(MOD_GUID, MOD_NAME, MOD_VERS)]
 	[BepInDependency("SpectateEnemy", BepInDependency.DependencyFlags.SoftDependency)]
 	public class BetterSpectateBase : BaseUnityPlugin
 	{
@@ -31,7 +31,7 @@ namespace BetterSpectate
 
 		private const string MOD_NAME = "BetterSpectate";
 
-		private const string MOD_VERS = "1.0.0.0";
+		private const string MOD_VERS = "1.1.0.0";
 
 		private readonly Harmony harmony = new Harmony("Fusition.BetterSpectate");
 
