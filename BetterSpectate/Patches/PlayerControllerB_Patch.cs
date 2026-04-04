@@ -34,7 +34,7 @@ namespace BetterSpectate.Patches
 				{
 					SpectateEnemyCompat.CheckIfSpectatingEnemies();
 				}
-				bool flag3 = !PlayerControllerB_Patch.inputDisabledForCompat && PlayerControllerB_Patch.firstPersonSpectateAction.WasPressedThisFrame();
+				bool flag3 = !PlayerControllerB_Patch.inputDisabledForCompat && PlayerControllerB_Patch.firstPersonSpectateAction.WasPressedThisFrame() && PlayerControllerB_Patch.isFirstPersonEnabled;
 				if (flag3)
 				{
 					PlayerControllerB_Patch.SwitchPerspective(__instance);
@@ -46,33 +46,36 @@ namespace BetterSpectate.Patches
 		[HarmonyPrefix]
 		public static bool RaycastSpectateCameraAroundPivot_Patch(PlayerControllerB __instance, RaycastHit ___hit, int ___walkableSurfacesNoPlayersMask)
 		{
-			bool flag = __instance.spectatedPlayerScript != null;
-			bool flag4;
-			if (flag)
-			{
-				Transform transform = __instance.spectatedPlayerScript.visorCamera.transform;
-				bool flag2 = PlayerControllerB_Patch.isFirstPersonEnabled && PlayerControllerB_Patch.firstPersonSpectateToggle;
-				if (flag2)
-				{
-					__instance.playersManager.spectateCamera.transform.position = transform.position;
-					__instance.playersManager.spectateCamera.transform.rotation = transform.rotation;
-					PlayerControllerB_Patch.isInFirstPerson = true;
-				}
-				else
-				{
-					bool flag3 = PlayerControllerB_Patch.isZoomEnabled;
-					if (flag3)
-					{
-						PlayerControllerB_Patch.RaycastCameraToZoomDistance(__instance, ___hit, ___walkableSurfacesNoPlayersMask);
-					}
-				}
-				flag4 = false;
-			}
-			else
-			{
-				flag4 = true;
-			}
-			return flag4;
+		    bool flag = __instance.spectatedPlayerScript != null;
+		    if (flag)
+		    {
+		        Transform transform = __instance.spectatedPlayerScript.visorCamera.transform;
+		        bool flag2 = PlayerControllerB_Patch.isFirstPersonEnabled && PlayerControllerB_Patch.firstPersonSpectateToggle;
+		        if (flag2)
+		        {
+		            __instance.playersManager.spectateCamera.transform.position = transform.position;
+		            __instance.playersManager.spectateCamera.transform.rotation = transform.rotation;
+		            PlayerControllerB_Patch.isInFirstPerson = true;
+		            return false;
+		        }
+		        else
+		        {
+		            PlayerControllerB_Patch.isInFirstPerson = false;
+		            if (PlayerControllerB_Patch.isZoomEnabled)
+		            {
+		                PlayerControllerB_Patch.RaycastCameraToZoomDistance(__instance, ___hit, ___walkableSurfacesNoPlayersMask);
+		                return false;
+		            }
+		            else
+		            {
+		                return true;
+		            }
+		        }
+		    }
+		    else
+		    {
+		        return true;
+		    }
 		}
 
 		[HarmonyPatch(typeof(PlayerControllerB), "SpectateNextPlayer")]
@@ -170,6 +173,10 @@ namespace BetterSpectate.Patches
 
 		public static void SwitchPerspective(PlayerControllerB controller)
 		{
+			if (!PlayerControllerB_Patch.isFirstPersonEnabled)
+			{
+				return;
+			}
 			PlayerControllerB_Patch.firstPersonSpectateToggle = !PlayerControllerB_Patch.firstPersonSpectateToggle;
 			bool flag = !PlayerControllerB_Patch.firstPersonSpectateToggle;
 			if (flag)
@@ -188,7 +195,14 @@ namespace BetterSpectate.Patches
 
 		public static void SetFirstPersonToggle(bool value)
 		{
-			PlayerControllerB_Patch.firstPersonSpectateToggle = value;
+			if (PlayerControllerB_Patch.isFirstPersonEnabled)
+			{
+				PlayerControllerB_Patch.firstPersonSpectateToggle = value;
+			}
+			else
+			{
+				PlayerControllerB_Patch.firstPersonSpectateToggle = false;
+			}
 		}
 
 		public static void SetModelVisibilityForFirstPerson(PlayerControllerB controller)

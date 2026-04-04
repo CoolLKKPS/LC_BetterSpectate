@@ -24,14 +24,27 @@ namespace BetterSpectate.Compatibility
 		[MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
 		public static void CheckIfSpectatingEnemies()
 		{
-			bool flag = SpectateEnemiesAPI.IsLoaded && SpectateEnemiesAPI.IsSpectatingEnemies;
-			if (flag)
+			bool isSpectating = SpectateEnemiesAPI.IsLoaded && SpectateEnemiesAPI.IsSpectatingEnemies;
+			if (isSpectating)
 			{
-				PlayerControllerB_Patch.SetFirstPersonToggle(false);
-				PlayerControllerB_Patch.SetInputDisabled(true);
+				if (!_wasSpectating)
+				{
+					PlayerControllerB_Patch.SetFirstPersonToggle(false);
+					PlayerControllerB_Patch.SetInputDisabled(true);
+				}
+				_wasSpectating = true;
+			}
+			else
+			{
+				if (_wasSpectating)
+				{
+					PlayerControllerB_Patch.SetInputDisabled(false);
+				}
+				_wasSpectating = false;
 			}
 		}
 
 		private static bool? _enabled;
+		private static bool _wasSpectating = false;
 	}
 }
