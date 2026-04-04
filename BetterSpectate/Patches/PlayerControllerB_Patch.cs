@@ -79,25 +79,29 @@ namespace BetterSpectate.Patches
 		[HarmonyPrefix]
 		public static bool SpectateNextPlayer_Patch(PlayerControllerB __instance, RaycastHit ___hit, int ___walkableSurfacesNoPlayersMask)
 		{
+			if (GameNetworkManager.Instance == null) return true;
 			int num = 0;
 			bool flag = __instance.spectatedPlayerScript != null;
 			if (flag)
 			{
 				num = (int)__instance.spectatedPlayerScript.playerClientId;
-				bool flag2 = __instance == GameNetworkManager.Instance.localPlayerController;
+				bool flag2 = GameNetworkManager.Instance.localPlayerController != null && __instance == GameNetworkManager.Instance.localPlayerController;
 				if (flag2)
 				{
 					PlayerControllerB_Patch.SetModelVisibilityForThirdPerson(__instance.spectatedPlayerScript);
 				}
 			}
+			if (__instance.playersManager == null || __instance.playersManager.allPlayerScripts == null) return true;
 			for (int i = 0; i < __instance.playersManager.allPlayerScripts.Length; i++)
 			{
 				num = (num + 1) % __instance.playersManager.allPlayerScripts.Length;
-				bool flag3 = !__instance.playersManager.allPlayerScripts[num].isPlayerDead && __instance.playersManager.allPlayerScripts[num].isPlayerControlled && __instance.playersManager.allPlayerScripts[num] != __instance;
+				var playerScript = __instance.playersManager.allPlayerScripts[num];
+				if (playerScript == null) continue;
+				bool flag3 = !playerScript.isPlayerDead && playerScript.isPlayerControlled && playerScript != __instance;
 				if (flag3)
 				{
-					__instance.spectatedPlayerScript = __instance.playersManager.allPlayerScripts[num];
-					bool flag4 = __instance == GameNetworkManager.Instance.localPlayerController;
+					__instance.spectatedPlayerScript = playerScript;
+					bool flag4 = GameNetworkManager.Instance.localPlayerController != null && __instance == GameNetworkManager.Instance.localPlayerController;
 					if (flag4)
 					{
 						bool flag5 = !PlayerControllerB_Patch.firstPersonSpectateToggle;
@@ -112,7 +116,14 @@ namespace BetterSpectate.Patches
 							PlayerControllerB_Patch.SetModelVisibilityForFirstPerson(__instance.spectatedPlayerScript);
 						}
 					}
-					__instance.SetSpectatedPlayerEffects(false);
+					try
+					{
+						__instance.SetSpectatedPlayerEffects(false);
+					}
+					catch (NullReferenceException)
+					{
+						BetterSpectateBase.fusLogSource?.LogWarning("NullReferenceException in SetSpectatedPlayerEffects caught and suppressed");
+					}
 					return false;
 				}
 			}
@@ -122,7 +133,7 @@ namespace BetterSpectate.Patches
 				__instance.spectateCameraPivot.position = __instance.deadBody.bodyParts[0].position;
 				PlayerControllerB_Patch.RaycastSpectateCameraAroundPivot_Patch(__instance, ___hit, ___walkableSurfacesNoPlayersMask);
 			}
-			StartOfRound.Instance.SetPlayerSafeInShip();
+			if (StartOfRound.Instance != null) StartOfRound.Instance.SetPlayerSafeInShip();
 			return false;
 		}
 
@@ -182,18 +193,20 @@ namespace BetterSpectate.Patches
 
 		public static void SetModelVisibilityForFirstPerson(PlayerControllerB controller)
 		{
-			controller.thisPlayerModelArms.enabled = true;
-			controller.thisPlayerModel.enabled = false;
-			controller.thisPlayerModelLOD1.enabled = false;
-			controller.thisPlayerModelLOD2.enabled = false;
+			if (controller == null) return;
+			if (controller.thisPlayerModelArms != null) controller.thisPlayerModelArms.enabled = true;
+			if (controller.thisPlayerModel != null) controller.thisPlayerModel.enabled = false;
+			if (controller.thisPlayerModelLOD1 != null) controller.thisPlayerModelLOD1.enabled = false;
+			if (controller.thisPlayerModelLOD2 != null) controller.thisPlayerModelLOD2.enabled = false;
 		}
 
 		public static void SetModelVisibilityForThirdPerson(PlayerControllerB controller)
 		{
-			controller.thisPlayerModelArms.enabled = false;
-			controller.thisPlayerModel.enabled = true;
-			controller.thisPlayerModelLOD1.enabled = true;
-			controller.thisPlayerModelLOD2.enabled = true;
+			if (controller == null) return;
+			if (controller.thisPlayerModelArms != null) controller.thisPlayerModelArms.enabled = false;
+			if (controller.thisPlayerModel != null) controller.thisPlayerModel.enabled = true;
+			if (controller.thisPlayerModelLOD1 != null) controller.thisPlayerModelLOD1.enabled = true;
+			if (controller.thisPlayerModelLOD2 != null) controller.thisPlayerModelLOD2.enabled = true;
 		}
 
 		public static float GetZoomDistance()
