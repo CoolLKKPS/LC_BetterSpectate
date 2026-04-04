@@ -1,0 +1,262 @@
+﻿using System;
+using BepInEx;
+using BetterSpectate.Compatibility;
+using GameNetcodeStuff;
+using HarmonyLib;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+namespace BetterSpectate.Patches
+{
+	[HarmonyPatch(typeof(PlayerControllerB))]
+	public class PlayerControllerB_Patch
+	{
+		[HarmonyPatch(typeof(PlayerControllerB), "LateUpdate")]
+		[HarmonyPrefix]
+		public static void LateUpdate_Patch(PlayerControllerB __instance)
+		{
+			bool flag = __instance == GameNetworkManager.Instance.localPlayerController && __instance.spectatedPlayerScript != null;
+			if (flag)
+			{
+				bool isHoldingObject = __instance.spectatedPlayerScript.isHoldingObject;
+				if (isHoldingObject)
+				{
+					__instance.spectatedPlayerScript.currentlyHeldObjectServer.parentObject = (PlayerControllerB_Patch.firstPersonSpectateToggle ? __instance.spectatedPlayerScript.localItemHolder.transform : __instance.spectatedPlayerScript.serverItemHolder.transform);
+				}
+				bool flag2 = UnityInput.Current.mouseScrollDelta.y != 0f && PlayerControllerB_Patch.isZoomEnabled;
+				if (flag2)
+				{
+					__instance.thisPlayerModel.enabled = false;
+					PlayerControllerB_Patch.SetZoomDistance((PlayerControllerB_Patch.zoomDistance + UnityInput.Current.mouseScrollDelta.y / -120f * PlayerControllerB_Patch.zoomSpeed).ZoomClamp());
+				}
+				bool enabled = SpectateEnemyCompat.enabled;
+				if (enabled)
+				{
+					SpectateEnemyCompat.CheckIfSpectatingEnemies();
+				}
+				bool flag3 = !PlayerControllerB_Patch.inputDisabledForCompat && PlayerControllerB_Patch.firstPersonSpectateAction.WasPressedThisFrame();
+				if (flag3)
+				{
+					PlayerControllerB_Patch.SwitchPerspective(__instance);
+				}
+			}
+		}
+
+		[HarmonyPatch(typeof(PlayerControllerB), "RaycastSpectateCameraAroundPivot")]
+		[HarmonyPrefix]
+		public static bool RaycastSpectateCameraAroundPivot_Patch(PlayerControllerB __instance, RaycastHit ___hit, int ___walkableSurfacesNoPlayersMask)
+		{
+			bool flag = __instance.spectatedPlayerScript != null;
+			bool flag4;
+			if (flag)
+			{
+				Transform transform = __instance.spectatedPlayerScript.visorCamera.transform;
+				bool flag2 = PlayerControllerB_Patch.isFirstPersonEnabled && PlayerControllerB_Patch.firstPersonSpectateToggle;
+				if (flag2)
+				{
+					__instance.playersManager.spectateCamera.transform.position = transform.position;
+					__instance.playersManager.spectateCamera.transform.rotation = transform.rotation;
+					PlayerControllerB_Patch.isInFirstPerson = true;
+				}
+				else
+				{
+					bool flag3 = PlayerControllerB_Patch.isZoomEnabled;
+					if (flag3)
+					{
+						PlayerControllerB_Patch.RaycastCameraToZoomDistance(__instance, ___hit, ___walkableSurfacesNoPlayersMask);
+					}
+				}
+				flag4 = false;
+			}
+			else
+			{
+				flag4 = true;
+			}
+			return flag4;
+		}
+
+		[HarmonyPatch(typeof(PlayerControllerB), "SpectateNextPlayer")]
+		[HarmonyPrefix]
+		public static bool SpectateNextPlayer_Patch(PlayerControllerB __instance, RaycastHit ___hit, int ___walkableSurfacesNoPlayersMask)
+		{
+			int num = 0;
+			bool flag = __instance.spectatedPlayerScript != null;
+			if (flag)
+			{
+				num = (int)__instance.spectatedPlayerScript.playerClientId;
+				bool flag2 = __instance == GameNetworkManager.Instance.localPlayerController;
+				if (flag2)
+				{
+					PlayerControllerB_Patch.SetModelVisibilityForThirdPerson(__instance.spectatedPlayerScript);
+				}
+			}
+			for (int i = 0; i < __instance.playersManager.allPlayerScripts.Length; i++)
+			{
+				num = (num + 1) % __instance.playersManager.allPlayerScripts.Length;
+				bool flag3 = !__instance.playersManager.allPlayerScripts[num].isPlayerDead && __instance.playersManager.allPlayerScripts[num].isPlayerControlled && __instance.playersManager.allPlayerScripts[num] != __instance;
+				if (flag3)
+				{
+					__instance.spectatedPlayerScript = __instance.playersManager.allPlayerScripts[num];
+					bool flag4 = __instance == GameNetworkManager.Instance.localPlayerController;
+					if (flag4)
+					{
+						bool flag5 = !PlayerControllerB_Patch.firstPersonSpectateToggle;
+						if (flag5)
+						{
+							BetterSpectateBase.fusLogSource.LogInfo("Model visibility adjusted for dead player in third person");
+							PlayerControllerB_Patch.SetModelVisibilityForThirdPerson(__instance.spectatedPlayerScript);
+						}
+						else
+						{
+							BetterSpectateBase.fusLogSource.LogInfo("Model visibility adjusted for dead player in first person");
+							PlayerControllerB_Patch.SetModelVisibilityForFirstPerson(__instance.spectatedPlayerScript);
+						}
+					}
+					__instance.SetSpectatedPlayerEffects(false);
+					return false;
+				}
+			}
+			bool flag6 = __instance.deadBody != null && __instance.deadBody.gameObject.activeSelf;
+			if (flag6)
+			{
+				__instance.spectateCameraPivot.position = __instance.deadBody.bodyParts[0].position;
+				PlayerControllerB_Patch.RaycastSpectateCameraAroundPivot_Patch(__instance, ___hit, ___walkableSurfacesNoPlayersMask);
+			}
+			StartOfRound.Instance.SetPlayerSafeInShip();
+			return false;
+		}
+
+		public static void InitializeFirstPersonSpectateInputAction(string binding)
+		{
+			PlayerControllerB_Patch.firstPersonSpectateAction = new InputAction("FirstPersonSpectatePressed", InputActionType.Value, binding, null, null, null);
+			PlayerControllerB_Patch.firstPersonSpectateAction.Enable();
+		}
+
+		public static bool IsPlayerInFirstPerson()
+		{
+			return PlayerControllerB_Patch.isInFirstPerson;
+		}
+
+		public static bool GetZoomEnabled()
+		{
+			return PlayerControllerB_Patch.isZoomEnabled;
+		}
+
+		public static void SetZoomEnabled(bool enabled)
+		{
+			PlayerControllerB_Patch.isZoomEnabled = true;
+		}
+
+		public static bool GetFirstPersonEnabled()
+		{
+			return PlayerControllerB_Patch.isFirstPersonEnabled;
+		}
+
+		public static void SetFirstPersonEnabled(bool enabled)
+		{
+			PlayerControllerB_Patch.isFirstPersonEnabled = true;
+		}
+
+		public static void SwitchPerspective(PlayerControllerB controller)
+		{
+			PlayerControllerB_Patch.firstPersonSpectateToggle = !PlayerControllerB_Patch.firstPersonSpectateToggle;
+			bool flag = !PlayerControllerB_Patch.firstPersonSpectateToggle;
+			if (flag)
+			{
+				BetterSpectateBase.fusLogSource.LogInfo("Player Toggled to Third Person");
+				PlayerControllerB_Patch.SetModelVisibilityForThirdPerson(controller.spectatedPlayerScript);
+				controller.spectateCameraPivot.transform.rotation = controller.spectatedPlayerScript.visorCamera.transform.rotation;
+				PlayerControllerB_Patch.zoomDistance = PlayerControllerB_Patch.defaultZoomDistance;
+			}
+			else
+			{
+				BetterSpectateBase.fusLogSource.LogInfo("Player Toggled to First Person");
+				PlayerControllerB_Patch.SetModelVisibilityForFirstPerson(controller.spectatedPlayerScript);
+			}
+		}
+
+		public static void SetFirstPersonToggle(bool value)
+		{
+			PlayerControllerB_Patch.firstPersonSpectateToggle = value;
+		}
+
+		public static void SetModelVisibilityForFirstPerson(PlayerControllerB controller)
+		{
+			controller.thisPlayerModelArms.enabled = true;
+			controller.thisPlayerModel.enabled = false;
+			controller.thisPlayerModelLOD1.enabled = false;
+			controller.thisPlayerModelLOD2.enabled = false;
+		}
+
+		public static void SetModelVisibilityForThirdPerson(PlayerControllerB controller)
+		{
+			controller.thisPlayerModelArms.enabled = false;
+			controller.thisPlayerModel.enabled = true;
+			controller.thisPlayerModelLOD1.enabled = true;
+			controller.thisPlayerModelLOD2.enabled = true;
+		}
+
+		public static float GetZoomDistance()
+		{
+			return PlayerControllerB_Patch.zoomDistance;
+		}
+
+		public static void SetZoomDistance(float value)
+		{
+			PlayerControllerB_Patch.zoomDistance = value;
+		}
+
+		public static void SetDefaultZoomDistance(float value)
+		{
+			PlayerControllerB_Patch.defaultZoomDistance = value;
+		}
+
+		public static float GetZoomSpeed()
+		{
+			return PlayerControllerB_Patch.zoomSpeed;
+		}
+
+		public static void SetZoomSpeed(float value)
+		{
+			PlayerControllerB_Patch.zoomSpeed = value;
+		}
+
+		public static void SetInputDisabled(bool value)
+		{
+			PlayerControllerB_Patch.inputDisabledForCompat = value;
+		}
+
+		private static void RaycastCameraToZoomDistance(PlayerControllerB controller, RaycastHit hit, int walkableSurfacesNoPlayersMask)
+		{
+			Ray ray = new Ray(controller.spectateCameraPivot.position, -controller.spectateCameraPivot.forward);
+			bool flag = Physics.Raycast(ray, out hit, PlayerControllerB_Patch.zoomDistance, walkableSurfacesNoPlayersMask, QueryTriggerInteraction.Ignore);
+			if (flag)
+			{
+				controller.playersManager.spectateCamera.transform.position = ray.GetPoint(hit.distance - 0.25f);
+			}
+			else
+			{
+				controller.playersManager.spectateCamera.transform.position = ray.GetPoint(PlayerControllerB_Patch.zoomDistance - 0.1f);
+			}
+			controller.playersManager.spectateCamera.transform.LookAt(controller.spectateCameraPivot);
+		}
+
+		private static bool isZoomEnabled;
+
+		private static float zoomDistance = 1.4f;
+
+		private static float zoomSpeed = 0.4f;
+
+		private static float defaultZoomDistance;
+
+		private static bool isFirstPersonEnabled;
+
+		private static InputAction firstPersonSpectateAction;
+
+		private static bool firstPersonSpectateToggle = false;
+
+		private static bool isInFirstPerson = false;
+
+		private static bool inputDisabledForCompat = false;
+	}
+}
