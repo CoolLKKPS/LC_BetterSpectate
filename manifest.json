@@ -1,6 +1,6 @@
 {
     "name": "BetterSpectate_ForkForMe",
-    "version_number": "1.2.0",
+    "version_number": "1.2.1",
     "website_url": "https://github.com/CoolLKKPS/LC_BetterSpectate",
     "description": "This client-side mod aims to provide highly customizable improvements to the spectator camera.",
     "dependencies": [

@@ -29,9 +29,9 @@ namespace BetterSpectate
 
 		public const string MOD_GUID = "Fusition.BetterSpectate";
 
-		private const string MOD_NAME = "BetterSpectate";
+        internal const string MOD_NAME = "BetterSpectate";
 
-		private const string MOD_VERS = "1.2.0.0";
+        internal const string MOD_VERS = "1.2.1.0";
 
 		private readonly Harmony harmony = new Harmony("Fusition.BetterSpectate");
 
