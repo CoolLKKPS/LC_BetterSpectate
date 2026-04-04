@@ -155,7 +155,7 @@ namespace BetterSpectate.Patches
 
 		public static void SetZoomEnabled(bool enabled)
 		{
-			PlayerControllerB_Patch.isZoomEnabled = true;
+			PlayerControllerB_Patch.isZoomEnabled = enabled;
 		}
 
 		public static bool GetFirstPersonEnabled()
@@ -165,7 +165,7 @@ namespace BetterSpectate.Patches
 
 		public static void SetFirstPersonEnabled(bool enabled)
 		{
-			PlayerControllerB_Patch.isFirstPersonEnabled = true;
+			PlayerControllerB_Patch.isFirstPersonEnabled = enabled;
 		}
 
 		public static void SwitchPerspective(PlayerControllerB controller)
