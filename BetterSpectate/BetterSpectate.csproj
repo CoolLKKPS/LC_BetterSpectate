@@ -9,20 +9,6 @@
     <FileAlignment>512</FileAlignment>
     <TargetFramework>net481</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup>
-    <EnableDefaultItems>False</EnableDefaultItems>
-  </PropertyGroup>
-  <PropertyGroup />
-  <ItemGroup>
-    <Compile Include="BetterSpectateAPI.cs" />
-    <Compile Include="BetterSpectateBase.cs" />
-    <Compile Include="Compatibility\SpectateEnemyCompat.cs" />
-    <Compile Include="ConfigSetup.cs" />
-    <Compile Include="Patches\PlayerControllerB_Patch.cs" />
-    <Compile Include="Patches\SpectateUtils.cs" />
-    <Compile Include="Patches\StartOfRound_Patch.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>D:\Local Modpack\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\0Harmony.dll</HintPath>

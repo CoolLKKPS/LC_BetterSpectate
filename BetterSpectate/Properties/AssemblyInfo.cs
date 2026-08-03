@@ -1,10 +1,7 @@
-﻿using System;
-using System.Diagnostics;
+﻿using BetterSpectate;
+using System;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
-using BetterSpectate;
 
 [assembly: AssemblyVersion(BetterSpectateBase.MOD_VERS)]
 [assembly: AssemblyTitle("BetterSpectate")]
