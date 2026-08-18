@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{37F835FF-8F3E-48D4-BC6D-95C6BD4A4DDC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>BetterSpectate</RootNamespace>
     <AssemblyName>BetterSpectate</AssemblyName>
