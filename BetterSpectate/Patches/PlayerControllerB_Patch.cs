@@ -21,7 +21,7 @@ namespace BetterSpectate.Patches
                 bool isHoldingObject = __instance.spectatedPlayerScript.isHoldingObject;
                 if (isHoldingObject)
                 {
-                    __instance.spectatedPlayerScript.currentlyHeldObjectServer.parentObject = (PlayerControllerB_Patch.firstPersonSpectateToggle ? __instance.spectatedPlayerScript.localItemHolder.transform : __instance.spectatedPlayerScript.serverItemHolder.transform);
+                    __instance.spectatedPlayerScript.currentlyHeldObjectServer.parentObject = PlayerControllerB_Patch.firstPersonSpectateToggle ? __instance.spectatedPlayerScript.localItemHolder.transform : __instance.spectatedPlayerScript.serverItemHolder.transform;
                 }
                 bool flag2 = UnityInput.Current.mouseScrollDelta.y != 0f && PlayerControllerB_Patch.isZoomEnabled;
                 if (flag2)
