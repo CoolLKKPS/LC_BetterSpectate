@@ -35,8 +35,11 @@
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>D:\SteamLibrary\steamapps\common\Lethal Company\Lethal Company_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
+    <Reference Include="LethalCompanyInputUtils">
+      <HintPath>D:\Runtime dependencies (local)\BepInEx\plugins\Rune580-LethalCompany_InputUtils\LethalCompanyInputUtils\LethalCompanyInputUtils.dll</HintPath>
+    </Reference>
     <Reference Include="SpectateEnemy">
-      <HintPath>D:\Runtime dependencies (local)\BepInEx\plugins\ZetaArcade-SpectateEnemiesFork\SpectateEnemy.dll</HintPath>
+      <HintPath>D:\Runtime dependencies (local)\BepInEx\plugins\AllToasters-SpectateEnemies\SpectateEnemy.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

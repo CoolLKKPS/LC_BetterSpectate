@@ -9,6 +9,7 @@ namespace BetterSpectate
 {
     [BepInPlugin(MOD_GUID, MOD_NAME, MOD_VERS)]
     [BepInDependency("SpectateEnemy", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency("com.rune580.LethalCompanyInputUtils", BepInDependency.DependencyFlags.SoftDependency)]
     public class BetterSpectateBase : BaseUnityPlugin
     {
         private void Awake()
@@ -30,7 +31,7 @@ namespace BetterSpectate
 
         internal const string MOD_NAME = "BetterSpectate";
 
-        internal const string MOD_VERS = "1.2.1.0";
+        internal const string MOD_VERS = "1.2.2.0";
 
         private readonly Harmony harmony = new Harmony("Fusition.BetterSpectate");
 
