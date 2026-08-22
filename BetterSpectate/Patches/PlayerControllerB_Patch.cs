@@ -142,11 +142,14 @@ namespace BetterSpectate.Patches
 
         public static void InitializeFirstPersonSpectateInputAction(string binding)
         {
-            InputAction inputUtilsAction = InputUtilsCompat.TryGetTogglePerspectiveAction(binding);
-            if (inputUtilsAction != null)
+            if (InputUtilsCompat.enabled)
             {
-                PlayerControllerB_Patch.firstPersonSpectateAction = inputUtilsAction;
-                return;
+                InputAction inputUtilsAction = InputUtilsCompat.TryGetTogglePerspectiveAction(binding);
+                if (inputUtilsAction != null)
+                {
+                    PlayerControllerB_Patch.firstPersonSpectateAction = inputUtilsAction;
+                    return;
+                }
             }
             PlayerControllerB_Patch.firstPersonSpectateAction = new InputAction("FirstPersonSpectatePressed", InputActionType.Value, binding, null, null, null);
             PlayerControllerB_Patch.firstPersonSpectateAction.Enable();

@@ -23,11 +23,6 @@ namespace BetterSpectate.Compatibility
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
         public static InputAction TryGetTogglePerspectiveAction(string binding)
         {
-            bool flag = !InputUtilsCompat.enabled;
-            if (flag)
-            {
-                return null;
-            }
             try
             {
                 BetterSpectateInputs inputs = new BetterSpectateInputs();
